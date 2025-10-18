@@ -7,8 +7,6 @@ from aiogram.fsm.state import State, StatesGroup
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from aiogram import types
-
 
 # 📧 Настройки почты Яндекс
 EMAIL_SENDER = "artempanteleev83@yandex.ru"           # твоя Яндекс-почта
@@ -30,7 +28,7 @@ def send_email(order_text: str):
     except Exception as e:
         print("⚠️ Ошибка при отправке письма:", e)
 
-# 🔹 Твой токен
+# 🔹 Токен бота
 TOKEN = "8358423233:AAFyUlknvq846kwCZrIyaiyK85g0YlLda4c"
 
 # 🔹 Создаём бота и диспетчер
@@ -89,8 +87,14 @@ async def process_phone(message: types.Message, state: FSMContext):
         return
     await state.update_data(phone=digits)
     await state.set_state(Order.product)
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add("Товар A", "Товар B", "Товар C")
+
+    # клавиатура для выбора товара
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=[
+            [types.KeyboardButton(text="Товар A"), types.KeyboardButton(text="Товар B"), types.KeyboardButton(text="Товар C")]
+        ],
+        resize_keyboard=True
+    )
     await message.answer("Выберите товар из списка:", reply_markup=keyboard)
 
 # 🔹 Шаг 3 — товар
@@ -98,8 +102,10 @@ async def process_phone(message: types.Message, state: FSMContext):
 async def process_product(message: types.Message, state: FSMContext):
     valid_products = ["Товар A", "Товар B", "Товар C"]
     if message.text not in valid_products:
-        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        keyboard.add(*valid_products)
+        keyboard = types.ReplyKeyboardMarkup(
+            keyboard=[[types.KeyboardButton(text=prod) for prod in valid_products]],
+            resize_keyboard=True
+        )
         await message.answer("⚠️ Ошибка! Выберите товар из кнопок ниже.", reply_markup=keyboard)
         return
     await state.update_data(product=message.text)
