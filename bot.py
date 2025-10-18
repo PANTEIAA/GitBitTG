@@ -7,6 +7,8 @@ from aiogram.fsm.state import State, StatesGroup
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from aiogram import types
+
 
 # 📧 Настройки почты Яндекс
 EMAIL_SENDER = "artempanteleev83@yandex.ru"           # твоя Яндекс-почта
@@ -46,9 +48,16 @@ class Order(StatesGroup):
 # 🔹 Команда /start
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message, state: FSMContext):
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add("📦 Список товаров", "📝 Оформить заявку")
-    await message.answer("👋 Привет! Я бот-магазин.\nВыбери действие ниже:", reply_markup=keyboard)
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=[
+            [types.KeyboardButton(text="📦 Список товаров"), types.KeyboardButton(text="📝 Оформить заявку")]
+        ],
+        resize_keyboard=True
+    )
+    await message.answer(
+        "👋 Привет! Я бот-магазин.\nВыбери действие ниже:",
+        reply_markup=keyboard
+    )
 
 # 🔹 Список товаров
 @dp.message(lambda message: message.text == "📦 Список товаров")
